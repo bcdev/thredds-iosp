@@ -14,19 +14,6 @@
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-envisat-reader</artifactId>
             <version>1.5.1</version>
-            <!--
-            <exclusions>
-
-                <exclusion>
-                    <groupId>org.slf4j.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
-            -->
         </dependency>
 
         <!-- third party -->
@@ -34,6 +21,7 @@
             <groupId>edu.ucar</groupId>
             <artifactId>netcdf</artifactId>
             <version>4.2.20</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -122,21 +110,32 @@
                 <configuration>
                     <skip>false</skip>
                     <forkMode>once</forkMode>
-                        <argLine>-Xmx512M -Dnoiotests=true</argLine>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <!-- NOTE: We don't need a groupId specification because the group is
-                        org.apache.maven.plugins ...which is assumed by default.
-                    -->
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.3</version>
-                    <configuration>
-                        <descriptorRefs>
-                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
-                    </configuration>
-                </plugin>
-            </plugins>
+                    <argLine>-Xmx512M -Dnoiotests=true</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- NOTE: We don't need a groupId specification because the group is
+                    org.apache.maven.plugins ...which is assumed by default.
+                -->
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <!-- this is used for inheritance merges -->
+                        <phase>package</phase>
+                        <!-- append to the packaging phase. -->
+                        <goals>
+                            <goal>single</goal>
+                            <!-- goals == mojos -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>
