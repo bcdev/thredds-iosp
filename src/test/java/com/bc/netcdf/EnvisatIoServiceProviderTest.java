@@ -33,7 +33,7 @@ public class EnvisatIoServiceProviderTest {
 
     @Test
     public void testIsValidFile() throws URISyntaxException, IOException {
-        final File validVFile = getResourceFile_validated("ATS_NR__2PNMAP20060918_095303_000000532051_00193_23794_0001.N1");
+        final File validVFile = ThreddsIOSPTestUtils.getResourceFile_validated("ATS_NR__2PNMAP20060918_095303_000000532051_00193_23794_0001.N1");
 
         RandomAccessFile validRAF = null;
         try {
@@ -45,7 +45,7 @@ public class EnvisatIoServiceProviderTest {
             }
         }
 
-        final File invalidVFile = getResourceFile_validated("not_a_valid.file");
+        final File invalidVFile = ThreddsIOSPTestUtils.getResourceFile_validated("not_a_valid.file");
 
         RandomAccessFile invalidRAF = null;
         try {
@@ -58,9 +58,4 @@ public class EnvisatIoServiceProviderTest {
         }
     }
 
-    private File getResourceFile_validated(String name1) throws URISyntaxException {
-        final File invalidVFile = new File(getClass().getResource(name1).toURI());
-        assertTrue(invalidVFile.isFile());
-        return invalidVFile;
-    }
 }

@@ -2,6 +2,8 @@ package com.bc.netcdf;
 
 import org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn;
 import org.esa.beam.framework.dataio.DecodeQualification;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.datamodel.Product;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
@@ -16,6 +18,8 @@ import java.io.IOException;
 public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
 
     private EnvisatProductReaderPlugIn readerPlugin;
+    private Product product;
+
 
     public EnvisatIoServiceProvider() {
         readerPlugin = new EnvisatProductReaderPlugIn();
@@ -29,12 +33,26 @@ public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
 
     @Override
     public void open(RandomAccessFile raf, NetcdfFile ncfile, CancelTask cancelTask) throws IOException {
-        super.open(raf, ncfile, cancelTask);    //To change body of overridden methods use File | Settings | File Templates.
+        super.open(raf, ncfile, cancelTask);
+
+        final String location = raf.getLocation();
+        final ProductReader productReader = readerPlugin.createReaderInstance();
+        product = productReader.readProductNodes(location, null);
+
+        if (cancelTask.isCancel()) {
+            return;
+        }
+
+
     }
 
     @Override
     public void close() throws IOException {
-        super.close();    //To change body of overridden methods use File | Settings | File Templates.
+        if (product != null) {
+            product.dispose();
+            product = null;
+        }
+        super.close();
     }
 
     public Array readData(Variable variable, Section section) throws IOException, InvalidRangeException {
