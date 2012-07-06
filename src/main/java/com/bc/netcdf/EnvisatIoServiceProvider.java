@@ -19,7 +19,6 @@ public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
 
     public EnvisatIoServiceProvider() {
         readerPlugin = new EnvisatProductReaderPlugIn();
-        throw new IllegalStateException("!!!!!!!!!!!!!    BÄNG-AGAIN  !!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
     public boolean isValidFile(RandomAccessFile randomAccessFile) throws IOException {

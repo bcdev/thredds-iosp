@@ -26,8 +26,8 @@ public class EnvisatDatasetSource implements DatasetSource {
     // we don't do anything in this class, the only important code is the static-block above that registers our IOSP to the NetCDF lib
     // tb 2012-07-03
     public boolean isMine(HttpServletRequest req) {
-        throw new IllegalStateException("!!!!!!!!!!!!!    BÄNG !!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        //return false;
+        //throw new IllegalStateException("!!!!!!!!!!!!!    Bï¿½NG !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        return false;
     }
 
     public NetcdfFile getNetcdfFile(HttpServletRequest req, HttpServletResponse res) throws IOException {
