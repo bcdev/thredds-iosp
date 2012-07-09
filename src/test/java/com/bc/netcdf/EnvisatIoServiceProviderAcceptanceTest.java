@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Test;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 import ucar.nc2.util.CancelTask;
 import ucar.unidata.io.RandomAccessFile;
 
@@ -11,6 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 public class EnvisatIoServiceProviderAcceptanceTest {
 
@@ -32,12 +36,14 @@ public class EnvisatIoServiceProviderAcceptanceTest {
         final NetcdfFile ncfile = new TestNetcdfFile();
         provider.open(randomAccessFile, ncfile, new TestCancelTask());
 
-//        final List<Attribute> globalAttributes = ncfile.getGlobalAttributes();
+        final Variable metadata = ncfile.findVariable("metadata");
+        assertNotNull(metadata);
         // @todo 1 tb/tb continue here
     }
 
     static class TestNetcdfFile extends NetcdfFile {
         TestNetcdfFile() {
+            empty();
         }
     }
 

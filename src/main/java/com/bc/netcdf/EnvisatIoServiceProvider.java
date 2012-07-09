@@ -1,6 +1,9 @@
 package com.bc.netcdf;
 
 import org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn;
+import org.esa.beam.dataio.netcdf.ProfileWriteContext;
+import org.esa.beam.dataio.netcdf.ProfileWriteContextImpl;
+import org.esa.beam.dataio.netcdf.metadata.profiles.beam.BeamMetadataPart;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
@@ -39,11 +42,19 @@ public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
         final ProductReader productReader = readerPlugin.createReaderInstance();
         product = productReader.readProductNodes(location, null);
 
-        if (cancelTask.isCancel()) {
+        if (mustCancel(cancelTask)) {
             return;
         }
 
+        final BeamMetadataPart metadataPart = new BeamMetadataPart();
+        final ProfileWriteContext writeContext = new ProfileWriteContextImpl(new NetCdfMemoryWriteable(ncfile));
+        metadataPart.preEncode(writeContext, product);
 
+        System.out.println("finish metadata");
+    }
+
+    private boolean mustCancel(CancelTask cancelTask) {
+        return cancelTask != null && cancelTask.isCancel();
     }
 
     @Override
