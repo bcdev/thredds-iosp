@@ -8,9 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class EnvisatIoServiceProviderTest {
 
@@ -58,4 +56,15 @@ public class EnvisatIoServiceProviderTest {
         }
     }
 
+    @Test
+    public void testMustCancel() {
+        assertFalse(EnvisatIoServiceProvider.mustCancel(null));
+
+        final TestCancelTask cancelTask = new TestCancelTask();
+        cancelTask.setCancel(false);
+        assertFalse(EnvisatIoServiceProvider.mustCancel(cancelTask));
+
+        cancelTask.setCancel(true);
+        assertTrue(EnvisatIoServiceProvider.mustCancel(cancelTask));
+    }
 }
