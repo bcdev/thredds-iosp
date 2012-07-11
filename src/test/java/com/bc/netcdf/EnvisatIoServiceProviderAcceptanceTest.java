@@ -51,12 +51,21 @@ public class EnvisatIoServiceProviderAcceptanceTest {
         assertEquals("lst", lst.getName());
         assertEquals("Land surface temperature", lst.getDescription());
         assertEquals(DataType.FLOAT, lst.getDataType());
+        assertEquals(512, lst.getDimension(0).getLength());
+        assertEquals(353, lst.getDimension(1).getLength());
+        assertEquals("x", lst.getDimension(0).getName());
+        assertEquals("y", lst.getDimension(1).getName());
 
         final Variable view_elev_fward = ncfile.findVariable("view_elev_fward");
         assertNotNull(view_elev_fward);
         assertEquals("view_elev_fward", view_elev_fward.getName());
         assertEquals("Satellite elevation forward view", view_elev_fward.getDescription());
         assertEquals(DataType.FLOAT, view_elev_fward.getDataType());
+        // @todo 1 tb/tb continue here
+//        assertEquals(11, view_elev_fward.getDimension(0).getLength());
+//        assertEquals(12, view_elev_fward.getDimension(1).getLength());
+//        assertEquals("tp_x", view_elev_fward.getDimension(0).getName());
+//        assertEquals("tp_y", view_elev_fward.getDimension(1).getName());
     }
 
     private void testCorrectSPH(Variable metadata) {

@@ -16,6 +16,7 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.iosp.AbstractIOServiceProvider;
@@ -23,15 +24,19 @@ import ucar.nc2.util.CancelTask;
 import ucar.unidata.io.RandomAccessFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
 
     private EnvisatProductReaderPlugIn readerPlugin;
     private Product product;
+    private HashMap<String, RasterDimension> dimensionMap;
 
 
     public EnvisatIoServiceProvider() {
         readerPlugin = new EnvisatProductReaderPlugIn();
+        dimensionMap = new HashMap<String, RasterDimension>();
     }
 
     public boolean isValidFile(RandomAccessFile randomAccessFile) throws IOException {
@@ -60,7 +65,32 @@ public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
             return;
         }
 
-        addBands(ncfile);
+        final Band[] bands = product.getBands();
+        int index = 0;
+        for (final Band band : bands) {
+            final int width = band.getSceneRasterWidth();
+            final int height = band.getSceneRasterHeight();
+            final String rasterDimensionName = width + "_" + height;
+            if (!dimensionMap.containsKey(rasterDimensionName)) {
+                final RasterDimension rasterDimension = new RasterDimension();
+                String dimName = createDimensionName("x", index);
+                rasterDimension.setXDimension(new Dimension(dimName, width));
+                dimName = createDimensionName("y", index);
+                rasterDimension.setYDimension(new Dimension(dimName, height));
+                dimensionMap.put(rasterDimensionName, rasterDimension);
+            }
+        }
+
+        final TiePointGrid[] tiePointGrids = product.getTiePointGrids();
+        index = 0;
+        for (int i = 0; i < tiePointGrids.length; i++) {
+            final TiePointGrid tiePointGrid = tiePointGrids[i];
+            final int rasterWidth = tiePointGrid.getRasterWidth();
+            final int rasterHeight = tiePointGrid.getRasterHeight();
+
+        }
+
+        addBandsAndDimensions(ncfile);
         addTiePointGrids(ncfile);
 
         ncfile.finish();
@@ -68,24 +98,54 @@ public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
 
     private void addTiePointGrids(NetcdfFile ncfile) {
         final TiePointGrid[] tiePointGrids = product.getTiePointGrids();
-        for (int i = 0; i < tiePointGrids.length; i++) {
-            final TiePointGrid tiePointGrid = tiePointGrids[i];
+
+        final int rasterWidth = tiePointGrids[0].getRasterWidth();
+        final int rasterHeight = tiePointGrids[0].getRasterHeight();
+        final ArrayList<Dimension> dimensions = createDimensionsList(rasterWidth, rasterHeight, "tp_x", "tp_y");
+
+        addDimensions(ncfile, dimensions);
+
+        for (final TiePointGrid tiePointGrid : tiePointGrids) {
             final Variable variable = new Variable(ncfile, null, null, tiePointGrid.getName());
             addDescription(variable, tiePointGrid.getDescription());
             addDataType(tiePointGrid, variable);
+            variable.setDimensions(dimensions);
             ncfile.addVariable(null, variable);
         }
     }
 
-    private void addBands(NetcdfFile ncfile) {
+    private void addDimensions(NetcdfFile ncfile, ArrayList<Dimension> dimensions) {
+        for (Dimension dimension : dimensions) {
+            ncfile.addDimension(null, dimension);
+        }
+    }
+
+    private void addBandsAndDimensions(NetcdfFile ncfile) {
+        final int width = product.getSceneRasterWidth();
+        final int height = product.getSceneRasterHeight();
+
+        final ArrayList<Dimension> dimensions = createDimensionsList(width, height, "x", "y");
+
+        addDimensions(ncfile, dimensions);
+
         final Band[] bands = product.getBands();
-        for (int i = 0; i < bands.length; i++) {
-            final Band band = bands[i];
+        for (final Band band : bands) {
             final Variable variable = new Variable(ncfile, null, null, band.getName());
             addDescription(variable, band.getDescription());
             addDataType(band, variable);
+            variable.setDimensions(dimensions);
+
             ncfile.addVariable(null, variable);
         }
+    }
+
+    static ArrayList<Dimension> createDimensionsList(int width, int height, String x, String y) {
+        final Dimension widthDim = new Dimension(x, width);
+        final Dimension heightDim = new Dimension(y, height);
+        final ArrayList<Dimension> dimensions = new ArrayList<Dimension>();
+        dimensions.add(widthDim);
+        dimensions.add(heightDim);
+        return dimensions;
     }
 
     private void addDataType(RasterDataNode node, Variable variable) {
@@ -121,5 +181,12 @@ public class EnvisatIoServiceProvider extends AbstractIOServiceProvider {
 
     static boolean mustCancel(CancelTask cancelTask) {
         return cancelTask != null && cancelTask.isCancel();
+    }
+
+    static String createDimensionName(String dimensionPrefix, int index) {
+        if (index > 0) {
+            return dimensionPrefix + index;
+        }
+        return dimensionPrefix;
     }
 }

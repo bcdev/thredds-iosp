@@ -2,11 +2,13 @@ package com.bc.netcdf;
 
 import org.junit.Before;
 import org.junit.Test;
+import ucar.nc2.Dimension;
 import ucar.unidata.io.RandomAccessFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -66,5 +68,26 @@ public class EnvisatIoServiceProviderTest {
 
         cancelTask.setCancel(true);
         assertTrue(EnvisatIoServiceProvider.mustCancel(cancelTask));
+    }
+
+    @Test
+    public void testCreateDimensionsList() {
+        List<Dimension> dimensionList = EnvisatIoServiceProvider.createDimensionsList(12, 15, "x", "y");
+        assertEquals(2, dimensionList.size());
+
+        final Dimension xDim = dimensionList.get(0);
+        assertEquals("x", xDim.getName());
+        assertEquals(12, xDim.getLength());
+
+        final Dimension yDim = dimensionList.get(1);
+        assertEquals("y", yDim.getName());
+        assertEquals(15, yDim.getLength());
+    }
+
+    @Test
+    public void testCreateDimensionName() {
+         assertEquals("x", EnvisatIoServiceProvider.createDimensionName("x", 0));
+         assertEquals("y1", EnvisatIoServiceProvider.createDimensionName("y", 1));
+         assertEquals("tp_x6", EnvisatIoServiceProvider.createDimensionName("tp_x", 6));
     }
 }
